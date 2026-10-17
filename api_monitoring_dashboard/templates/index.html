@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PulseCheck | API Monitor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand-mark">P</div>
+      <div>
+        <p class="eyebrow">DEVELOPER TOOLKIT</p>
+        <h1>PulseCheck<span>.</span></h1>
+      </div>
+      <span class="demo-tag">MVP · LOCAL DEMO</span>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">API HEALTH MONITOR</p>
+          <h2>Know when your<br><span>services need attention.</span></h2>
+          <p class="intro">Run a quick health check on HTTP endpoints and review their response status and latency in one place.</p>
+        </div>
+        <div class="pulse-art" aria-hidden="true">
+          <div class="pulse-ring ring-one"></div>
+          <div class="pulse-ring ring-two"></div>
+          <div class="pulse-dot"></div>
+          <div class="pulse-line"></div>
+        </div>
+      </section>
+
+      <section class="panel checker">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">01 / CONFIGURE</p>
+            <h3>Endpoints to check</h3>
+          </div>
+          <span class="helper">One URL per line · max 10</span>
+        </div>
+        <form method="post">
+          <label for="urls">HTTP / HTTPS URLs</label>
+          <textarea id="urls" name="urls" rows="4" spellcheck="false">{{ urls }}</textarea>
+          <div class="form-bottom">
+            <p>Only check services you’re authorized to test.</p>
+            <button type="submit"><span>Run health check</span><span aria-hidden="true">↗</span></button>
+          </div>
+        </form>
+      </section>
+
+      {% if results %}
+      <section class="summary-grid" aria-label="Check summary">
+        <article class="summary-card">
+          <p class="eyebrow">ENDPOINTS CHECKED</p>
+          <strong>{{ checked_count }}</strong>
+          <span>in this run</span>
+        </article>
+        <article class="summary-card">
+          <p class="eyebrow">ONLINE</p>
+          <strong class="green">{{ online_count }}</strong>
+          <span>responded successfully</span>
+        </article>
+        <article class="summary-card">
+          <p class="eyebrow">NEEDS ATTENTION</p>
+          <strong class="orange">{{ issue_count }}</strong>
+          <span>errors or unreachable</span>
+        </article>
+      </section>
+
+      <section class="panel results-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">02 / RESULTS</p>
+            <h3>Health report</h3>
+          </div>
+          <span class="helper">Checked at request time</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Endpoint</th><th>Status</th><th>HTTP</th><th>Latency</th></tr></thead>
+            <tbody>
+              {% for result in results %}
+              <tr>
+                <td class="url-cell"><span class="url-icon">↗</span><span>{{ result.url }}</span>
+                  {% if result.error %}<small>{{ result.error }}</small>{% endif %}
+                </td>
+                <td><span class="status-pill {{ 'status-online' if result.status == 'Online' else 'status-issue' }}"><i></i>{{ result.status }}</span></td>
+                <td>{{ result.status_code }}</td>
+                <td>{% if result.latency_ms != '—' %}{{ result.latency_ms }} ms{% else %}—{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="timestamp">Last checked: {{ results[-1].checked_at }}</p>
+      </section>
+      {% else %}
+      <section class="empty-state">
+        <div class="empty-icon">⌁</div>
+        <h3>Your first report is one click away.</h3>
+        <p>Run a check to see endpoint status, HTTP codes, and response time here.</p>
+      </section>
+      {% endif %}
+    </main>
+    <footer><span>PulseCheck · Built with Python + Flask</span><span>Educational project · Not a production monitoring system</span></footer>
+  </div>
+</body>
+</html>
